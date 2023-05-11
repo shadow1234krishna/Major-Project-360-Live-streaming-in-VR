@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-server
+  labels:
+    {{- include "email.labels" . | nindent 4 }}
+    app.kubernetes.io/component: email-server
+    app: {{ .Release.Name }}-server
+spec:
+  replicas: {{ .Values.emailServer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "email.labels" . | nindent 6 }}
+      app.kubernetes.io/component: email-server
+      app: {{ .Release.Name }}-server
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+      {{- include "email.annotations" . | nindent 8 }}
+      labels:
+        {{- include "email.labels" . | nindent 8 }}
+        app.kubernetes.io/component: email-server
+        app: {{ .Release.Name }}-server
+        app: {{ .Release.Name }}    
+    spec:
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{ range .Values.emailServer.command }} 
+            - {{ . | quote }}
+            {{- end }}
+            
+          
+          envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config
+                - secretRef:
+                    name: {{ .Release.Name }}-secrets
+          ports:
+            - name: {{ .Values.emailServer.network.name }}
+              containerPort: {{ .Values.emailServer.network.containerPort }}
+              protocol: {{ .Values.emailServer.network.protocol }}
+         

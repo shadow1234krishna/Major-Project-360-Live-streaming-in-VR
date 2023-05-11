@@ -1,0 +1,6 @@
+dependencies:
+- name: auth-db
+  repository: file://charts/auth-db
+  version: 0.1.0
+digest: sha256:c4bbaeb99e84a2c4179d7ab4e2380f9b6c96f9dce87e7caf0256f6e2c6f6a01e
+generated: "2023-03-06T20:29:33.129438+05:30"

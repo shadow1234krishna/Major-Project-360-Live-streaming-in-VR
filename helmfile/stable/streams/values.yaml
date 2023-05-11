@@ -1,0 +1,14 @@
+streamsServer:
+  replicaCount: 1
+  command: ["sh",  "-c" , "gunicorn streams.wsgi:application --bind 0.0.0.0:9001"]
+  network:
+    name: streams-port
+    containerPort: "9001"
+    protocol: TCP
+  service:
+    port: "9001"
+    targetport: "9001"
+    type: ClusterIP
+  resources:
+    memory: "64Mi"
+    cpu: "100m"

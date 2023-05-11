@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Release.Name}}-service
+  labels:
+    {{- include "streams.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.streamsServer.service.type }}
+  ports:
+    - port: {{ .Values.streamsServer.service.port }}
+      targetPort: {{ .Values.streamsServer.service.targetport }}
+      protocol: TCP
+      name: streams-port
+  selector:
+    {{- include "streams.labels" . | nindent 4 }}
+    app.kubernetes.io/component: streams-server

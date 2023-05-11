@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-server
+  labels:
+    app.kubernetes.io/component: ui-server
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ui.labels" . | nindent 6 }}
+      app.kubernetes.io/component: ui-server
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "ui.labels" . | nindent 8 }}
+        app.kubernetes.io/component: ui-server
+        app: {{ .Release.Name }} 
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: {{ range .Values.ui.command }} 
+            - {{ . | quote }}
+            {{- end }}
+          volumeMounts:
+          - name: {{ .Release.Name }}-nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+          ports:
+            - name: {{ .Values.ui.network.name }}
+              containerPort: {{ .Values.ui.network.containerPort }}
+              protocol: {{ .Values.ui.network.protocol }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-ui-conf
+      volumes:
+        - name: {{ .Release.Name }}-nginx-conf
+          configMap:
+            name: {{ .Release.Name }}-nginx-conf
+ 

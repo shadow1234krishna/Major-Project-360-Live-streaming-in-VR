@@ -1,0 +1,36 @@
+.Stream-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+  }
+  
+  .text {
+    font-size: 36px;
+    font-weight: bold;
+    color: #363636;
+    margin-bottom: 20px;
+  }
+  
+  .desc {
+    font-size: 24px;
+    color: #8a8a8a;
+    margin-bottom: 40px;
+  }
+  
+  .Streaming {
+    width: 1000px;
+    height: 520px;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  
+  iframe {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  

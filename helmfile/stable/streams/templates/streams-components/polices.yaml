@@ -1,0 +1,54 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-auth
+spec:
+  selector:
+    matchLabels:
+      app: streams
+  jwtRules:
+  - issuer: authservice
+    jwks: '{ "keys":[ {"kty": "RSA","n": "ytznnUQzlCX8W3ek3h3U0063EpIW3uqe2fOyHu4No3aV4QkonsPeUd6CP0xloS8nSij40-W3yRVEjSzJRbj3iVy7ZDKm2nYjk5U7Wx8IKaKrG6v0qPOAp8Bc37bp4d7kcjFHtvRAJDq8yBdCMMlgT99yhUMp6HoXtw5IDlbzL5nend4eKJuAHzgCCbQEK2yhpsrqIYJD04bQqRmYAVUsjRFlyC6LYUWeQ_EVkQPaLUi9mbMjGwzE2EDU9bPbIOTu_aPLxAlM0L6B4neQFZ4E3MNVQCpgm2MhmNuSful_KCBM62HsvX4NYaPXZDzOkoBffsKWb5ucgMmwEBbUlUghei9GeMtKL_cf8Cr_uWnQzHMbiH9nvm7Eg_8gKIWASVnb3SWOLFjQgRBn9_lBbgac8TEcbUiYbbKlsFzjNxwbRF0XbUr6N_sNBuSDHm9ZO22ib8ULC8xOwLn9EFiFP0IPXp_mXwBU-C5YaNB8XXU49g2ZdWvlVSvckHGINreAmDIfR-WPx3r6jeDX8SlIj3dAre5xzU9yl14gcjcFIHocQoGvkhQpUvwJIrhv6CBuFC0IL9wTBjf1HDpVa-yTGzHt8145SRbJDIPh28p_0NKIaLRTIK_q0vgEPC19QPBYszW5aMayYIelmbIdYmtpYHZjuaeoAkCp2p9p8OWEK0TOrl8","e": "AQAB","alg": "RS256","use": "enc"}]}'
+    forwardOriginalToken: True
+---
+apiVersion: security.istio.io/v1beta1
+
+
+kind: AuthorizationPolicy
+metadata:
+  name: add-stream-policy
+spec:
+  selector:
+    matchLabels:
+      app: streams
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths: ["/api/streams/*"]
+        methods: ["GET"]
+    when:
+    - key: request.auth.claims[iss]
+      values: ["authservice"]
+  - to:
+    - operation:
+        paths: ["/api/streams/matches*"]
+        methods: ["POST" , "DELETE"]
+    when:
+      - key: request.auth.claims[group]
+        notValues: ["user"]
+  - to:
+    - operation:
+        paths: ["/api/streams/*"]
+        methods: ["POST"]
+    when:
+      - key: request.auth.claims[group]
+        values: ["streamer"]
+  - to:
+    - operation:
+        paths: ["/api/streams/*"]
+        methods: ["POST"]
+    when:
+      - key: request.auth.claims[group]
+        values: ["admin"]
+---

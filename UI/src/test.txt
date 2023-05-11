@@ -1,0 +1,21 @@
+   {/* <Route path="/" exact={true}>
+              {token ? <Home /> : <Navigate to="/login" />}
+            </Route> */}
+            <Route path="/" element={token ? <Home /> : <Navigate replace to="/login" />} />
+            <Route  path="/about"  element={token ? <About /> :<Navigate replace to ="/about"/>}></Route>
+            {/* <Route path="/login">
+              {!token ? <Login /> : <Navigate to="/" />}
+            </Route> */}
+             <Route path="/login" element={!token ? <Login/> : <Navigate replace to="/" />} />
+            {/* <Route path="/signup">
+              {!token ? <Signup /> : <Navigate to="/" />}
+            </Route> */}
+             <Route path="/signup" element={!token ? <Signup /> : <Navigate replace to="/" />} />
+            {/* <Route exact path="/Video" component={Video}>
+            {!token ? <Signup /> : <Navigate to="/" />}
+              
+            </Route> */}
+             <Route  path="/Stream"  element={token ? <Video /> : <Navigate replace to="/" />} />
+             <Route  path="/forgotpassword"  element={ <Forgotpassword/> } />
+             
+            <Route path="/password-reset/:id/:token" element={<PasswordReset />} />

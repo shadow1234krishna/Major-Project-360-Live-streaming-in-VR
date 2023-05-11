@@ -1,0 +1,44 @@
+environments:
+  staging:
+  release:
+---
+---
+helmDefaults:
+  createNamespace: true
+templates:
+  app: &app
+    chart: stable/{{`{{.Release.Name }}`}}
+    namespace: application
+    missingFileHandler: "Debug"
+    values:
+    - stable/{{`{{ .Release.Name }}`}}/values.yaml
+    - stable/{{`{{ .Release.Name }}`}}/{{`{{ .Environment.Name }}`}}-values.yaml
+    
+  ui: &ui
+    chart: stable/{{`{{.Release.Name }}`}}
+    namespace: ffb
+    missingFileHandler: "Debug"
+    values:
+    - stable/{{`{{ .Release.Name }}`}}/{{`{{ .Environment.Name }}`}}-values.yaml
+    - stable/{{`{{ .Release.Name }}`}}/values.yaml
+
+  worker: &worker
+    chart: stable/{{`{{.Release.Name }}`}}
+    namespace: worker
+    missingFileHandler: "Debug"
+    values:
+    - stable/{{`{{ .Release.Name }}`}}/{{`{{ .Environment.Name }}`}}-values.yaml
+    - stable/{{`{{ .Release.Name }}`}}/values.yaml
+releases:
+- name: auth
+  version: 0.1.0
+  <<: *app
+- name: streams
+  version: 0.1.0
+  <<: *app
+- name: ui
+  version: 0.1.0
+  <<: *ui
+- name: email
+  version: 0.1.0
+  <<: *worker

@@ -1,0 +1,7 @@
+.git/
+.idea/
+venv/
+*.pyc
+data/
+.env
+*.env

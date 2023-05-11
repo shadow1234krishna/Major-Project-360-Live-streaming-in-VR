@@ -1,0 +1,91 @@
+# Default values for streams-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+streams-db:
+  namespace: databases
+streamsServer:
+  replicaCount: 1
+  command: ["sh", "-c", "gunicorn streams.wsgi:application --bind 0.0.0.0:9001"]
+  network:
+    name: streams-port
+    containerPort: "9001"
+    protocol: TCP
+  service:
+    port: "9001"
+    targetport: "9001"
+    type: ClusterIP
+  resources:
+    memory: "64Mi"
+    cpu: "100m"
+image:
+  repository: waddahahmad/stream-service
+  tag: 2.2.3
+  pullPolicy: IfNotPresent
+istio:
+  enabled: true
+ingress:
+  host: streams
+  domain: minikube.local
+  gateway: istio-ingress/ilb-gateway
+  prefix: /api/streams
+app:
+  namespace: application
+  # Overrides the image tag whose default is the chart appVersion.
+configmap:
+  data:
+    DB_ENGINE: "django.db.backends.postgresql"
+    DB_NAME: streams
+    DB_USER: waddah
+    DB_HOST: streams-db.databases.svc.cluster.local
+    DB_PORT: "5432"
+secrets:
+  data:
+    DB_PASSWORD: d2FkZGFo
+    DJANGO_SECRET_KEY: ZGphbmdvLWluc2VjdXJlLV96az05eWw9dWwhcG9AX3otKXdxJng0PSYhKG9uczIocG9neXU1MitmN2YzN3YzaiR5
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9001
+resources: {}
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 100m
+#   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+nodeSelector: {}
+tolerations: []
+affinity: {}

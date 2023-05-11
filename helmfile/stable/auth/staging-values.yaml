@@ -1,0 +1,186 @@
+# Default values for auth-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+auth-db:
+  namespace: databases
+authServer:
+  replicaCount: 1
+  command: ["sh",  "-c" , "gunicorn djangoauthapi1.wsgi:application --bind 0.0.0.0:9000 --log-level info"]
+  network:
+    name: auth-port
+    containerPort: "9000"
+    protocol: TCP
+  service:
+    port: "9000"
+    targetport: "9000"
+    type: ClusterIP
+  resources:
+    memory: "64Mi"
+    cpu: "100m"
+
+image:
+  repository: waddahahmad/auth-service
+  tag: 2.0.0
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+istio: 
+  enabled: true
+
+ingress:
+  host: auth
+  domain: minikube.local
+  gateway: istio-ingress/ilb-gateway
+  prefix: /api/user
+
+configmap: 
+  data:
+    DB_ENGINE: django.db.backends.postgresql
+    DB_PORT: "5432"
+    DB_NAME: auth
+    DB_USER: waddahh
+    DB_HOST: auth-db.databases.svc.cluster.local
+    DJANGO_SUPERUSER_USERNAME: waddah
+    DJANGO_SUPERUSER_EMAIL: waddah.20121999@gmail.com
+    EMAIL_USER: waddah.20121999@gmail.com
+    EMAIL_FROM: waddah.20121999@gmail.com
+    REDIS_HOST: redis://redis-master.worker.svc.cluster.local:6379/0
+    REDIS_PORT: 6379
+secrets: 
+  data:
+    DJANGO_SUPERUSER_PASSWORD: d2FkZGFoaA==
+    EMAIL_PASS: a2ZnenFhbHVjeWVvZHRycQo=
+    JWT_SECRET_KEY: eWlnYXlpd2dvd2FoYXdqam9wYXdqCg==
+    DB_PASSWORD: d2FkZGFoaA==
+    DJANGO_SECRET_KEY: ZGphbmdvLWluc2VjdXJlLV96az05eWw9dWwhcG9AX3otKXdxJng0PSYhKG9uczIocG9neXU1MitmN2YzN3YzaiR5
+    JWT_ISSUER: YXV0aHNlcnZpY2U=
+jwt_keys:
+  JWT_SIGNING_KEY: |-
+        LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ0KTUlJSktBSUJBQUtDQWdFQXl0em5uVVF6
+        bENYOFczZWszaDNVMDA2M0VwSVczdXFlMmZPeUh1NE5vM2FWNFFrbw0KbnNQZVVkNkNQMHhsb1M4
+        blNpajQwK1czeVJWRWpTekpSYmozaVZ5N1pES20ybllqazVVN1d4OElLYUtyRzZ2MA0KcVBPQXA4
+        QmMzN2JwNGQ3a2NqRkh0dlJBSkRxOHlCZENNTWxnVDk5eWhVTXA2SG9YdHc1SURsYnpMNW5lbmQ0
+        ZQ0KS0p1QUh6Z0NDYlFFSzJ5aHBzcnFJWUpEMDRiUXFSbVlBVlVzalJGbHlDNkxZVVdlUS9FVmtR
+        UGFMVWk5bWJNag0KR3d6RTJFRFU5YlBiSU9UdS9hUEx4QWxNMEw2QjRuZVFGWjRFM01OVlFDcGdt
+        Mk1obU51U2Z1bC9LQ0JNNjJIcw0Kdlg0TllhUFhaRHpPa29CZmZzS1diNXVjZ01td0VCYlVsVWdo
+        ZWk5R2VNdEtML2NmOENyL3VXblF6SE1iaUg5bg0Kdm03RWcvOGdLSVdBU1ZuYjNTV09MRmpRZ1JC
+        bjkvbEJiZ2FjOFRFY2JVaVliYktsc0Z6ak54d2JSRjBYYlVyNg0KTi9zTkJ1U0RIbTlaTzIyaWI4
+        VUxDOHhPd0xuOUVGaUZQMElQWHAvbVh3QlUrQzVZYU5COFhYVTQ5ZzJaZFd2bA0KVlN2Y2tIR0lO
+        cmVBbURJZlIrV1B4M3I2amVEWDhTbElqM2RBcmU1eHpVOXlsMTRnY2pjRklIb2NRb0d2a2hRcA0K
+        VXZ3SklyaHY2Q0J1RkMwSUw5d1RCamYxSERwVmEreVRHekh0ODE0NVNSYkpESVBoMjhwLzBOS0lh
+        TFJUSUsvcQ0KMHZnRVBDMTlRUEJZc3pXNWFNYXlZSWVsbWJJZFltdHBZSFpqdWFlb0FrQ3AycDlw
+        OE9XRUswVE9ybDhDQXdFQQ0KQVFLQ0FnRUFnNTlWQUNzeU5CdDVZM2Q3bDBwUHZsTENZZUE3eXFM
+        OE1ubjF4aSs2MWFhcGxIczJ5ZHhZTVZKbg0KdTk0N3lwc25xT3h3bGp2a1JTbnhjby91ZjdpRms3
+        Q0JQWC9IMXRMMFBsdURTWm9XMTd6ZHZIU1RwOU5tVkhGeA0KVVE0RExqUktrUFQ4ak81cGQ1aE15
+        SjZlcWJ6ZktyUFdRRFRWeWlyOW5CNCtEbC9JSmNoMk1vUGRtWWRiVitZbA0KSEZxYW9mbzM0RnFr
+        RXQzTVdFQ092a2tHNFVaOFE0TllRTXhDVHZpMnVXcUJEYmdzSlZtZSswekpxRkZlbnRsaA0KMDVI
+        QXlkVUFZNzJWQmpycWhqNDFVOVV6dlhMcndMbFVaTythQXZnTTRuc0UwQ2Q4QTNNQnRXK3lCVGoy
+        UWJYbQ0KbVBrREp2YjMvdTBPWXBmYXNZMHJHU1ZYQlF6cCtvMnFGOGRNS3RkUHcwdkxpSXA1UExt
+        Qm43Y1NXVENYRzNKSg0KeldVMHZpaGdTOG9aaEJ3dkNXOXJWalVmMFZYYWZrQWpyd015YTdvYkdn
+        QkNOQmk0WG1hdHc1QnBRM0RrQ1Fpdw0KclgvMUZKSXVERmw3TlUxeExjRVNzb3ZPejZsY0tpUDBv
+        Q2VIWEx6Y3E4YUhRY1hzVWpZSWNEaWErcG1ZZnJQYw0KWmd0MC9tWGVmTDllUlpKMTJ0ZDAvNDNY
+        ZEZYRnluZGtsOHR1YWJrTEhBYmpvTGlDUzhiVnRuT3E1SXZiMHBFZw0KRzk0MitUSTRmaU9IZXlU
+        VUthQk9MRXljVkZVTytrRlhJR044ZlBBUkJwT3lNMXFCdHdvQklycVR4d1lMd241Mg0KZklEZFFZ
+        L3QxR3BzUUFiY1FFbGhiMHNOQThPc0d0TnYvTUtWV1Nid1VmeTZrQTZvdHpFQ2dnRUJBUDJuc0Jo
+        SA0KYzF5ZkQ3WEVvbDNpQi9SRmRkYk01NkprbTFMWEZPQjhGRitQY0lYaFV0TTMzMGRuVERrR1Vn
+        ZjNTNjJuWXhGYw0KREhnTmQybVZnYWh4Si9SRlNDU2ZIU2tOdmUyMXhpdmxNbWpnSWNrVkRUMlV3
+        QzhySGp6eG10R05mVVdSRGFpdA0KSTZIS0ZOZGJiSm94SVlKNzMzZjFnVUhpQURNcUtqSkVSaFlB
+        WmJsVGFmQXF4VU1TZ2J5cUtlNGNvRjAvMW9pYg0KU2wrNHBObHFxaGQvN09XOVJwVFB1ckdzKzFS
+        VG5yaDdaK3JIdnQxK29naVpwVjFlclhobkJYL0NkYVRVeThCSg0KOVh3cEdYbGorSU1ON0F4U3li
+        bHRaSkZvWms0QlhyZDFjdWlaRnk0R0NwaVU5Q0k0TnBNOTA3SlU5c0ZYL3lubw0KQ3RnRGNadzh3
+        ZGdkTXpzQ2dnRUJBTXk5QW9MTXIwUHpTUG1YTTBoRlJnL3pQWTVPcXM2N25KRUtwWjhhZ3FpTQ0K
+        OWs3bHdOMHl4K3BzWGNXUW1MRUZXSzFjRW9URktIUUdQU1Q3bHBYcTk5amlSQzJRTjczTzBqYU1T
+        WHhPZWduSg0KMEo0em9Hc2VjNWRCYkFlemdXeDVodWJGMmNPWHEzME5DcldsU3JKMjUvTjdSaDJz
+        MW1EKzZJeUVpME5YaThHUg0KZS83R2lrNDgyb21FLzZzWHJzdjNkdUdTeHZBNVhjZ3VQWmtpb200
+        QjJWRWp6Nk1na1hpSXlXSHpmSWVKdW9VZA0KeGhBUXNtQlJ4OTc1MHFFbko0VWtMN3ZkV0ZJWXBP
+        RTZOOWZPQitROGh3K3IraTJQeUt3RTlleWdhT1FHZ1EvTw0KVktjNS9rZ3doaUF1bmNKK3FhdjIr
+        a3BMYjNQd3ZILzBDeWlBSWFSUk55MENnZ0VBUVRKeHk3dkp4aHZJUVBNNg0KdktEVlpJN1ovQTBN
+        Mkt1OVZLeWQzQmxvYnl1Q1E1Y24zOHh6b25uRm1MNnNKUW9HTkt0YWhtSy9mYmdRWWw0Zw0KUm5o
+        WFNhenBIeWlhcVN1MERyNXpJbU0xOHNqeFJpc1lEU1VIeE5melhMekpDMld2dGtyVFZQQ3p3T2tk
+        TkVGMg0KaDZkck1vdStZNm9Cd0RwanpNTGd0NnpleXRidFRwWkhHNGtTek91YjF5OXh1WmM0RE4v
+        VXQ2WWFsc0h4OVVRNg0KVmZIMnBSSmlhdXQ5MUI5Zk5reUw5bVVaejducHNDclZZUnFFNjV2alFK
+        aFNUSVZpRWF6MGRnZE1oczVWa3VNRQ0KUkVNMjBmQVJrNHl2bGNSY3oxNEF4Mnp6elI5VVd1c0lu
+        REZsRXNxYUZIeUd4a2FhYWhYQkt6ZE9Xam1BWVNVbw0KdWZDL2N3S0NBUUJQNngvRnl2eEhPL29x
+        WTFrRFJ2YzRWcXlhbGg2YW9DVlhnSjV4NHJsSjdleGZrOU9iQksyQQ0KMWxnc1BHczkvbVpGRllH
+        dERnRGllV1Q0d0xSaFJOMEdiaHhLNU5hOVlyUXYwc2NFbk9XS1dKcjBoaGFDZWRxSg0KR21KL0J4
+        VG9NTy8xdVJsdC9oQlV1ZmlLTzBGVE5KTUtPZjUrcXU3cjRkVUl0TnhmcHhiSXNtK0NYaUd5dEpK
+        aA0KeCthODlIdW81cW9qRjFaTWd6Z1dZZVp0bGxWdE40K0sycjI4WVlRblZzMjFUSVE1ckF1QTFz
+        UnZsUFRzSUVBeQ0KeTdYcWJneEJMb1RyZ2xWdGhtMGw5Y0hDbll2N0RaMXpBcUNmbEZheXZ5VDMv
+        dzJ5cE05UVNpeEZNcUFOc2ROSg0KVUtrSU9NVW1lVHZ1TUZBTEk5ZVE0c1JRUk9QYzdrN3BBb0lC
+        QUNhR0pjVTcxbTNISTZJYWE0eEJ4WUlXMldPZw0KRSs0Y0ZQMHg2SmIrWXpGOWhTTU5TU1hnMUJ6
+        cUdteGFTUC8vLzdTczUxUkNxb21LTVAzdFFuZFVPanYxWGI0dw0KUHVEbFgvSkE5MEZ2VEEvWGVJ
+        NDY0WThFRDlYM2JBRmJRdlUzYWFha0NScGxqeGF2Sk1pWXZZaTFKa01mTGl6eg0KYXhnU2ErNFQ5
+        WkNuNnM3M0ZmS21oTHl2czVzZ1I4Y2lveTlZSWc5a1lNcHVVWTJqZnJWbWdheTBGTlhtZUtlUw0K
+        cXVBY2xhUGZWcWI4ZHoyMUJuN2JZb2lsZ2dqaTV2RjBoMUV5djV5WS9wT2IwUVZkMm5qQld2VUwx
+        ekx6VUh1Vg0KVkxWY3dWL1hCMnJoMDNJRFVhaGYzZjlpcW84WnVDaTZ1cytsbTA1KzFNd2hHVU82
+        eTFNWUVNYTgzd009DQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==
+
+  JWT_VERIFYING_KEY: |-
+        LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0NCk1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NB
+        ZzhBTUlJQ0NnS0NBZ0VBeXR6bm5VUXpsQ1g4VzNlazNoM1UNCjAwNjNFcElXM3VxZTJmT3lIdTRO
+        bzNhVjRRa29uc1BlVWQ2Q1AweGxvUzhuU2lqNDArVzN5UlZFalN6SlJiajMNCmlWeTdaREttMm5Z
+        ams1VTdXeDhJS2FLckc2djBxUE9BcDhCYzM3YnA0ZDdrY2pGSHR2UkFKRHE4eUJkQ01NbGcNClQ5
+        OXloVU1wNkhvWHR3NUlEbGJ6TDVuZW5kNGVLSnVBSHpnQ0NiUUVLMnlocHNycUlZSkQwNGJRcVJt
+        WUFWVXMNCmpSRmx5QzZMWVVXZVEvRVZrUVBhTFVpOW1iTWpHd3pFMkVEVTliUGJJT1R1L2FQTHhB
+        bE0wTDZCNG5lUUZaNEUNCjNNTlZRQ3BnbTJNaG1OdVNmdWwvS0NCTTYySHN2WDROWWFQWFpEek9r
+        b0JmZnNLV2I1dWNnTW13RUJiVWxVZ2gNCmVpOUdlTXRLTC9jZjhDci91V25RekhNYmlIOW52bTdF
+        Zy84Z0tJV0FTVm5iM1NXT0xGalFnUkJuOS9sQmJnYWMNCjhURWNiVWlZYmJLbHNGempOeHdiUkYw
+        WGJVcjZOL3NOQnVTREhtOVpPMjJpYjhVTEM4eE93TG45RUZpRlAwSVANClhwL21Yd0JVK0M1WWFO
+        QjhYWFU0OWcyWmRXdmxWU3Zja0hHSU5yZUFtRElmUitXUHgzcjZqZURYOFNsSWozZEENCnJlNXh6
+        VTl5bDE0Z2NqY0ZJSG9jUW9HdmtoUXBVdndKSXJodjZDQnVGQzBJTDl3VEJqZjFIRHBWYSt5VEd6
+        SHQNCjgxNDVTUmJKRElQaDI4cC8wTktJYUxSVElLL3EwdmdFUEMxOVFQQllzelc1YU1heVlJZWxt
+        YklkWW10cFlIWmoNCnVhZW9Ba0NwMnA5cDhPV0VLMFRPcmw4Q0F3RUFBUT09DQotLS0tLUVORCBQ
+        VUJMSUMgS0VZLS0tLS0=
+imagePullSecrets: []
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

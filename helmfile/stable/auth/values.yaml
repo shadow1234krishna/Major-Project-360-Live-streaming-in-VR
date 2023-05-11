@@ -1,0 +1,18 @@
+# Default values for auth-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+authServer:
+  replicaCount: 1
+  command: ["sh",  "-c" , "gunicorn djangoauthapi1.wsgi:application --bind 0.0.0.0:9000 --log-level info"]
+  network:
+    name: auth-port
+    containerPort: "9000"
+    protocol: TCP
+  service:
+    port: "9000"
+    targetport: "9000"
+    type: ClusterIP
+  resources:
+    memory: "64Mi"
+    cpu: "100m"

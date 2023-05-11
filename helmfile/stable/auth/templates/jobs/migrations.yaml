@@ -1,0 +1,35 @@
+###########################
+# Job
+###########################
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.Release.Name}}-migrate
+  labels:
+    {{- include "auth.labels" . | nindent 4 }}
+    app.kubernetes.io/component: auth-migrate-job
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Release.Name }}-job
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        command: ["sh",  "/home/app/web/entrypoint.prod.sh"]
+        envFrom:
+            - configMapRef:
+                name: {{.Release.Name}}-config
+            - secretRef:
+                name: {{.Release.Name}}-secrets
+                        
+      restartPolicy: OnFailure
+  backoffLimit: 4

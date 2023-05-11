@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Itim&family=Monoton&display=swap');
+.scroll{
+    overflow: scroll;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color:aliceblue;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.header .fa-user {
+    color: rgb(255, 255, 255);
+    margin-right: 0.5rem;
+}
+
+.profile-icon {
+    font-size: 48px;
+    margin-right: 16px;
+    color: #1e90ff;
+    animation: rotate 2s linear infinite;
+}
+
+.profile-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 2s ease-in-out;
+}
+
+.wel-text{
+    color: bisque;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+.image-c {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .soccer {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  
+  .text-o {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    color: rgb(46, 40, 72);
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.8);
+    font-family: 'Itim', cursive;
+  }
+.home{
+    background: rgb(20,17,85);
+    background: linear-gradient(90deg, rgba(20,17,85,0.9585084033613446) 13%, rgba(0,0,0,0.9248949579831933) 77%);
+}
+#auto-write-text {
+    font-size: 36px;
+    font-weight: bold;
+    color: #F6F1E9;
+    text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    animation: auto-write 2s ease-in-out forwards;
+   
+  }
+  
+  @keyframes auto-write6-text {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+.nem{
+  top: 0;
+  left: 0;
+  z-index: 1;
+  position: absolute;
+  float: right;
+  margin-left: 70rem;
+}
+.button__holder {
+  position: relative;
+  width: 300px;
+  height:300px ;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.button__holder:after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.button__holder h2 {
+  margin-right: 1em;
+  text-align: center;
+  color: #f40000;
+  font-size: rem;
+}
+
+.plus {
+  position: relative;
+  z-index: 1;
+  width: 100px;
+  height: 100px;
+  color: #1a1a1a;
+  background: #ed1c5b;
+  border-radius: 50%;
+  border: none;
+  transition: box-shadow 400ms cubic-bezier(0.2, 0, 0.7, 1), transform 200ms cubic-bezier(0.2, 0, 0.7, 1);
+}
+.plus:after {
+  content: "+";
+  font-size: 2.5em;
+  line-height: 1.1em;
+}
+.plus:hover {
+  transform: rotate(45deg);
+  box-shadow: 0 0 1px 15px rgba(138, 59, 88, 0.4), 0 0 1px 30px rgba(138, 59, 88, 0.1), 0 0 1px 45px rgba(138, 59, 88, 0.1);
+}
+
+
+@media screen and (max-width: 768px) {
+    .header {
+      font-size: 1rem;
+    }
+  
+    .profile-icon {
+      font-size: 36px;
+    }
+  
+    .text-o {
+      font-size: 24px;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .header {
+      font-size: 0.8rem;
+    }
+  
+    .profile-icon {
+      font-size: 24px;
+    }
+  
+    .text-o {
+      font-size: 18px;
+    }
+  
+    .nem {
+      margin-left: 0;
+      margin-top: 1rem;
+    }
+  
+    .button__holder {
+      width: 200px;
+      height: 200px;
+    }
+  
+    .plus:after {
+      font-size: 2em;
+    }
+  }
+  

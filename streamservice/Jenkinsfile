@@ -1,0 +1,148 @@
+node {  
+    env.repo_url = "https://github.com/Waddah-Ahmad/MP_streamservice.git"
+	env.registry = "waddahahmad/stream-service"
+	env.APP_NAME = "streams"
+	env.TAG = "1.2.4"
+    env.branch_target = ""
+    env.environment = ""
+    env.status = ""
+
+    properties([
+        buildDiscarder(logRotator(daysToKeepStr: '1', numToKeepStr: '2')),
+    ])
+    stage('branch info') {
+        sh "echo 'Building on branch ${env.BRANCH_NAME}'"
+        slackSend channel: '#project', message: "Build start for ${env.BRANCH_NAME} ${env.APP_NAME}: (${env.JOB_NAME}#${env.BUILD_NUMBER})  <${env.BUILD_URL}|Open in Jenkins>"
+    }
+    stage('SCM'){
+        checkout([
+            $class: 'GitSCM',
+            branches: [[name: 'refs/heads/'+env.BRANCH_NAME]],
+            extensions: [[$class: 'CloneOption', noTags: false, shallow: false, depth: 0, reference: '']],
+            userRemoteConfigs: scm.userRemoteConfigs,
+        ])
+        echo "building tag : ${env.TAG} "
+        sh 'git log HEAD^..HEAD --pretty="%h %an - %s" > GIT_CHANGES'
+        def lastChanges = readFile('GIT_CHANGES')
+        slackSend color: "warning", message: "Started ${env.JOB_NAME}#${env.BUILD_NUMBER}\n\n_The changes:_\n${lastChanges}"
+    }
+    try{   
+    if ("${env.BRANCH_NAME}" != "release"){
+        stage('Test'){
+            sh '''
+            export DJANGO_SETTINGS=dev
+            virtualenv env 
+            . env/bin/activate
+            env/bin/pip install -r requirements.txt
+            env/bin/pip install python-dotenv
+            env/bin/python manage.py makemigrations
+            env/bin/python manage.py migrate
+            env/bin/python manage.py test
+            '''
+            slackSend color: "good", message: "Build successful: ${env.JOB_NAME}#${env.BUILD_NUMBER} <${env.BUILD_URL}|Open in Jenkins>"
+        }
+    }
+    }
+    catch (err) {
+        env.status = "failed"
+        slackSend color: "danger", message: "Build failed :face_with_head_bandage: \n${env.JOB_NAME}#${env.BUILD_NUMBER} <${env.BUILD_URL}|Open in Jenkins>"
+        throw err
+    }
+    if ("${env.BRANCH_NAME}"== "staging"){
+    stage('SonarQube analysis') {
+        slackSend color: "good", message: "SonarQube analysis: \n${env.JOB_NAME}#${env.BUILD_NUMBER} <${env.BUILD_URL}|Open in Jenkins>"
+        def scannerHome = tool 'sonarqube';
+        withSonarQubeEnv('sonarqube') { 
+          sh "${scannerHome}/bin/sonar-scanner"
+        }
+    }
+    stage('code analyze status'){
+        timeout(time: 10, unit: 'MINUTES') {
+            def qGate = waitForQualityGate('sonarqube')
+            if (qGate.status != 'OK') {
+                error "Pipeline aborted due to quality gate failure: ${qGate.status}"
+                slackSend color: "danger", message: "SonarQube analysis failed ${qGate.status}: \n${env.JOB_NAME}#${env.BUILD_NUMBER} <${env.BUILD_URL}|Open in Jenkins>"
+            }
+            if (qGate.status == 'OK') {
+                slackSend color: "good", message: "SonarQube analysis success ${qGate.status}: \n${env.JOB_NAME}#${env.BUILD_NUMBER} <${env.BUILD_URL}|Open in Jenkins>"
+            }
+        }
+    }  
+    }   
+    stage('Build Image') {
+        script{
+            if ("${env.BRANCH_NAME}"== "release") {
+                dockerImage = docker.build ("${registry}:${TAG}", "-f Dockerfile.prod .")
+                dockerImage.inside {            
+                    echo "hi from inside" 
+                    } 
+            }       
+            if  ("${env.BRANCH_NAME}"== "staging") {
+                dockerImage = docker.build ("${registry}:staging-${TAG}", "-f Dockerfile.prod .")
+                dockerImage.inside {  
+                    echo "hi from inside" 
+                    }  
+            }
+	        else   {
+                echo "dev env"
+            }
+        }
+    }
+  
+   stage('Push Image') {
+	   script{
+		   
+		   if ("${env.BRANCH_NAME}" == "release" || "${env.BRANCH_NAME}" == "staging" ){
+		           withDockerRegistry(credentialsId: 'docker-cred') { 
+           		 dockerImage.push() 
+                 
+            sh "docker image rm -f ${registry}:${TAG}"
+            sh "docker image rm -f ${registry}:staging-${TAG}"
+		   }
+           slackSend channel: '#project', message: "pushing docker image for ${env.BRANCH_NAME}, ${env.APP_NAME} with tag ${env.TAG}: ${env.JOB_NAME}#${env.BUILD_NUMBER} , <${env.BUILD_URL}|Open in Jenkins>"
+		   }
+		   else if ("${env.BRANCH_NAME}".startsWith('dev')){
+		   echo "skip"
+		   }
+	   }
+   // sh "docker run -v $projectPath/reports:/app/reports  --rm --network='host' --env-file=.test.env $registry:${params.RELEASE_TAG} coverage run -m pytest --verbose --junit-xml reports/results.xml"
+   
+    }
+    stage('trigger stage'){
+        script{
+            if ("${env.BRANCH_NAME}"== "development" ){
+                env.branch_target = "staging"
+                env.environment = "dev" 
+                echo "build branch : ${env.BRANCH_NAME}, and promote it to next env which is : ${env.branch_target}"
+                build job: 'git-publisher', parameters: [string(name: 'branch_target', value: env.branch_target), string(name: 'repo_url', value: env.repo_url), string(name: 'BRANCH_NAME', value: env.BRANCH_NAME), string(name: 'tag', value: env.TAG), string(name: 'environment', value: env.environment)]
+            }
+            if ("${env.BRANCH_NAME}"== "staging" ){
+                env.branch_target = "release"
+                env.environment = "staging" 
+                echo "build branch : ${env.BRANCH_NAME}, and promote it to next env which is : ${env.branch_target}"
+                build job: 'git-publisher', parameters: [string(name: 'branch_target', value: env.branch_target), string(name: 'repo_url', value: env.repo_url), string(name: 'BRANCH_NAME', value: env.BRANCH_NAME), string(name: 'tag', value: env.TAG), string(name: 'environment', value: env.environment)]
+            }
+            else {
+                echo "pass" 
+            } 
+            slackSend channel: '#project', message: 'update env by git publisher ${env.BRANCH_NAME} ${env.APP_NAME} with tag ${env.TAG} to branch : ${env.branch_target} : `${env.JOB_NAME}#${env.BUILD_NUMBER}`  <${env.BUILD_URL}|Open in Jenkins>'
+        }
+    }       
+    stage('update version'){
+        script{
+            if ("${env.BRANCH_NAME}"== "release" ){
+                env.environment = "release" 
+                echo "build branch : ${env.APP_NAME}, and edit version ${env.TAG} in helm : ${env.environment}"
+                build job: 'update_v', parameters: [string(name: 'TAG', value: env.TAG), string(name: 'APP_NAME', value: env.APP_NAME), string(name: 'ENV', value: env.environment)]
+                }
+            if ("${env.BRANCH_NAME}"== "staging" ){
+                echo "build branch : ${env.APP_NAME}, and edit version ${env.TAG} in helm : ${env.environment}"
+                build job: 'update_v', parameters: [string(name: 'TAG', value: env.TAG), string(name: 'APP_NAME', value: env.APP_NAME), string(name: 'ENV', value: env.environment)]
+                }
+            else {
+                echo "pass" 
+            } 
+            slackSend channel: '#project', message: "update tag ${env.TAG} ${env.APP_NAME} for ${env.environment}  ${env.APP_NAME}: ${env.JOB_NAME}#${env.BUILD_NUMBER}  <${env.BUILD_URL}|Open in Jenkins>"
+        }
+    }       
+}

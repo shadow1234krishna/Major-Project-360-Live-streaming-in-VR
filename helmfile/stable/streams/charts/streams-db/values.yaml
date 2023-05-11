@@ -1,0 +1,47 @@
+
+
+namespace: databases
+replicaCount: 1
+namespaceOverride : utility
+env:
+  configMap:
+    data:
+      POSTGRES_USER: waddah
+      POSTGRES_DB: streams
+  Secret:
+    data:
+      POSTGRES_PASSWORD: d2FkZGFo
+image:
+  repository: postgres
+  pullPolicy: IfNotPresent
+  tag: latest
+db:
+  volumes: auth-volume
+imagePullSecrets: []
+nameOverride: djangpostgres
+fullnameOverride: djangpostgresql
+
+service:
+  enabled: true
+  annotations:
+    docker.repo.kubernetes.io/name: "postgres"
+  clusterIP: ""
+  externalIPs: []
+  loadBalancerIP: ""
+  type: ClusterIP
+  ports:
+    app:
+      port: 5432
+      targetPort: http
+      protocol: TCP
+  nodePort:
+      nodePort: 30010
+podAnnotations: {}
+resources: {}
+nodeSelector: {}
+storage_class_name: ""
+storage: 20
+ISCSI:
+  - IP: ISCSISERVERIP:3260
+    iqn: IQN-tgt0
+postgresuser: ad

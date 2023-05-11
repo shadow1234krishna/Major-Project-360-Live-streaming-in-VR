@@ -1,0 +1,95 @@
+# Default values for email-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+emailServer:
+  replicaCount: 1
+  command: ["sh",  "-c" , "celery -A myproject worker -l info "]
+  network:
+    name: email-port
+    containerPort: "9001"
+    protocol: TCP
+  service:
+    port: "9001"
+    targetport: "9001"
+    type: ClusterIP
+  resources:
+    memory: "64Mi"
+    cpu: "100m"
+image:
+  repository: waddahahmad/email-service
+  tag: 1.1.1
+  pullPolicy: IfNotPresent
+istio: 
+  enabled: true
+
+configmap: 
+  data:
+    DJANGO_SETTINGS: prod
+    REDIS_HOST: redis-master.worker.svc.cluster.local
+    REDIS_PORT: 6379
+    EMAIL_USER: waddah.20121999@gmail.com
+    
+
+
+secrets:
+  data:
+    EMAIL_PASS: a2ZnenFhbHVjeWVvZHRycQo=
+    DJANGO_SECRET_KEY: ZGphbmdvLWluc2VjdXJlLV96az05eWw9dWwhcG9AX3otKXdxJng0PSYhKG9uczIocG9neXU1MitmN2YzN3YzaiR5
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9001
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

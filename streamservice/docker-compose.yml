@@ -1,0 +1,45 @@
+version: '3.9'
+services:
+  streams_db:
+    restart: always
+    image: postgres:latest
+    
+    ports:
+      - 5444:5444
+    environment:
+    - POSTGRES_USER=waddah # The PostgreSQL user (useful to connect to the database)
+    - POSTGRES_PASSWORD=waddah # The PostgreSQL password (useful to connect to the database)
+    - POSTGRES_DB=streams # The PostgreSQL default database 
+    command: -p 5444
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      #- ./data/db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      #- ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+
+
+  streams:
+    build: 
+      context: .
+      dockerfile: Dockerfile.prod
+    environment:
+      #- DJANGO_SETTINGS=dev
+      - DJANGO_SECRET_KEY=django-insecure-_zk=9yl=ul!po@_z-)wq&x4=&!(ons2(pogyu52+f7f37v3j$y
+      - DJANGO_ALLOWED_HOSTS=www.example.com localhost 127.0.0.1
+      - DJANGO_CORS_ORIGIN_WHITELIST=http://google.com http://localhost:3000 http://127.0.0.1:3000
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=streams
+      - DB_USER=waddah
+      - DB_PASSWORD=waddah
+      - DB_HOST=streams_db
+      - DB_PORT=5444
+      
+      
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:9001"
+    #command: gunicorn streams.wsgi:application --bind 0.0.0.0:9001
+    
+
+    ports:
+      - "9001:9001"
+    depends_on:
+      - streams_db

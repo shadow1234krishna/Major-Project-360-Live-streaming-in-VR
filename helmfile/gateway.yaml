@@ -1,0 +1,31 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ilb-gateway
+  namespace: istio-ingress
+spec:
+  selector:
+    istio: ilb-gateway # use Istio internal gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+# apiVersion: networking.istio.io/v1alpha3
+# kind: Gateway
+# metadata:
+#   name: external-gateway
+#   namespace: external-gw
+# spec:
+#   selector:
+#     istio: external-ingressgateway # use Istio external gateway implementation
+#   servers:
+#   - port:
+#       number: 800
+#       name: http
+#     hosts:
+#     - "interface/*"
+# ---

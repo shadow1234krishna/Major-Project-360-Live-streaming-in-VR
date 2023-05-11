@@ -1,0 +1,10 @@
+environments:
+  staging:
+  release:
+---
+helmfiles:
+- path: istio.yaml
+- path: helmfile-istio.yaml
+- path: helmfile-app.yaml
+
+

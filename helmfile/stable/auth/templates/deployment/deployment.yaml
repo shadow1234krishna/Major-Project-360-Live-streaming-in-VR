@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-server
+  labels:
+    {{- include "auth.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.authServer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "auth.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "auth.labels" . | nindent 8 }}
+      annotations:
+      {{- include "auth.annotations" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: {{ range .Values.authServer.command }} 
+            - {{ . | quote }}
+            {{- end }}
+          envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config
+                - secretRef:
+                    name: {{ .Release.Name }}-secrets
+
+          ports:
+            - name: {{ .Values.authServer.network.name }}
+              containerPort: {{ .Values.authServer.network.containerPort }}
+              protocol: {{ .Values.authServer.network.protocol }}
+ 

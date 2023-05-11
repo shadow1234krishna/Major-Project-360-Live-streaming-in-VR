@@ -1,0 +1,13 @@
+emailServer:
+  replicaCount: 1
+  network:
+    name: email-port
+    containerPort: "9001"
+    protocol: TCP
+  service:
+    port: "9001"
+    targetport: "9001"
+    type: ClusterIP
+  resources:
+    memory: "64Mi"
+    cpu: "100m"

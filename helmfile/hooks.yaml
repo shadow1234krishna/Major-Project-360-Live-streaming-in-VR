@@ -1,0 +1,25 @@
+hooks:
+- events: ["prepare"]
+  showlogs: true
+  command: bash
+  args:
+    - -c
+    - "kubectl create namespace application --dry-run=client -o yaml | kubectl apply -f -"
+- events: ["prepare"]
+  showlogs: true
+  command: bash
+  args:
+    - -c
+    - "kubectl create namespace databases --dry-run=client -o yaml | kubectl apply -f -"
+- events: ["prepare"]
+  showlogs: true
+  command: bash
+  args:
+    - -c
+    - "kubectl label --dry-run=client -o yaml --overwrite namespace application istio-injection=enabled | kubectl apply -f -"
+- events: ["prepare"]
+  showlogs: true
+  command: bash
+  args:
+    - -c
+    - "kubectl apply -f gateway.yaml"

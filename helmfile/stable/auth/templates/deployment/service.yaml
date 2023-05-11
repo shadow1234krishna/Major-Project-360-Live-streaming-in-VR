@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Release.Name}}-service
+  labels:
+    {{- include "auth.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.authServer.service.type }}
+  ports:
+    - port: {{ .Values.authServer.service.port }}
+      targetPort: {{ .Values.authServer.service.targetport }}
+      protocol: TCP
+      name: auth-port
+  selector:
+    {{- include "auth.labels" . | nindent 4 }}
+    app.kubernetes.io/component: auth-server

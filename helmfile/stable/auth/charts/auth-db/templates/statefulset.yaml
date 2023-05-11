@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-db
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-db
+    chart: "{{ .Chart.Name }}-db-{{ .Chart.Version }}"
+    heritage: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    user: {{ .Values.postgresuser }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Chart.Name }}
+    spec:
+      volumes:
+        - name: {{ .Values.db.volumes }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: {{ .Values.db.volumes }}
+            
+          ports:
+          - name: http
+            protocol: TCP
+            containerPort: {{ .Values.service.ports.app.port }}
+          
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-db-config
+            - secretRef:
+                name: {{ .Release.Name }}-db-secret

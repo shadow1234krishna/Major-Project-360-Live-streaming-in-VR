@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-server
+  labels:
+    {{- include "streams.labels" . | nindent 4 }}
+    app.kubernetes.io/component: streams-server
+    app: {{ .Release.Name }}-server
+spec:
+  replicas: {{ .Values.streamsServer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "streams.labels" . | nindent 6 }}
+      app.kubernetes.io/component: streams-server
+      app: {{ .Release.Name }}-server
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+      {{- include "streams.annotations" . | nindent 8 }}
+      labels:
+        {{- include "streams.labels" . | nindent 8 }}
+        app.kubernetes.io/component: streams-server
+        app: {{ .Release.Name }}-server
+        app: {{ .Release.Name }}    
+    spec:
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{ range .Values.streamsServer.command }} 
+            - {{ . | quote }}
+            {{- end }}
+
+            
+          envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config
+                - secretRef:
+                    name: {{ .Release.Name }}-secrets
+          ports:
+            - name: {{ .Values.streamsServer.network.name }}
+              containerPort: {{ .Values.streamsServer.network.containerPort }}
+              protocol: {{ .Values.streamsServer.network.protocol }}
+         

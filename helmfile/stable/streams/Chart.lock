@@ -1,0 +1,6 @@
+dependencies:
+- name: streams-db
+  repository: file://charts/streams-db
+  version: 0.1.0
+digest: sha256:39eeaff89ff1457c4f77524551b2752a4ae40bd5d502c37fb6c79b0573c827eb
+generated: "2023-03-06T20:29:34.0375502+05:30"

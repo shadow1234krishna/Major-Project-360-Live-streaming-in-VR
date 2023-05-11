@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ui-conf
+data:
+  {{- range $key, $val := .Values.ui.uiConf }}
+  {{$key}}: {{ $val | quote}}
+  {{- end }}
