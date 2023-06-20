@@ -81,5 +81,5 @@ each repository of them have readme file describes the service and its rule.
 * Slack Notification
 * ArgoCD
 * Helmfile
-## 5. Extra technologies
+## 5. IAAC technologies
 * Terraform
