@@ -1,5 +1,5 @@
 # MAJOR_PROJECT_DOCS
-this repository collects all informations and documetations about all structure and remote 
+this repository collects all informations and documetations about all structures and remote 
 repositories of the application
 
 > this project have future work and some requirements to be added like extra security , extra test codes , underlying infra for tha application
@@ -31,7 +31,7 @@ user service where jwt getting issued and trusted
 
 # HOW IT RUNS
 each repository of them have readme file describes the service and its rule.
-### it requires two types of components:
+### it requires some types of setup:
 * resources setup:
     - Minikube or any K8S Cluster
 * networking setup:
