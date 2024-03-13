@@ -13,7 +13,7 @@ The live streaming system help in various sports , education sectors such as VR 
 seperated admin panel and user interface which are built in react framework
 JWT for authn & authz 
 appling devOps Practices and tools
-## Application Architectureb
+## Application Architecture
 ![plot](./img/arch.jpg)
 
 ## GIT Workflow
