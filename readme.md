@@ -1,4 +1,4 @@
-# MAJOR_PROJECT_DOCS
+# MAJOR_PROJECT_DOCS_KWDR
 this repository collects all informations and documetations about all structures and remote 
 repositories of the application
 
